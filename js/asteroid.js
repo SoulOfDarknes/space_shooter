@@ -15,6 +15,10 @@ export class Asteroid {
         this.asteroid.y = -20;
         this.asteroid.anchor.set(0.5);
 
+        this.speed = 2 + Math.random() * 2;
+
+        this.horizontalMove = (Math.random() - 0.5) * 2;
+
         this.asteroid.animationSpeed = 0.1;
         this.asteroid.play();
 
@@ -23,10 +27,14 @@ export class Asteroid {
 
     move() {
         if (!this.alive || !this.moving) return;
-        this.asteroid.y += 2;
+        this.asteroid.y += this.speed;
+        this.asteroid.x += this.horizontalMove;
+
         if (this.asteroid.y > this.app.screen.height + 20) {
             this.asteroid.x = Math.random() * this.app.screen.width;
             this.asteroid.y = -20;
+            this.speed = 2 + Math.random() * 2;
+            this.horizontalMove = (Math.random() - 0.5) * 2;
         }
     }
 

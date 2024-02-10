@@ -141,8 +141,8 @@ export class GameManager {
     }
 
     endGame(message) {
-        if (!this.gameActive) return; // Ігноруйте, якщо гра вже закінчена
-        this.gameActive = false; // Змініть стан на "закінчена"
+        if (!this.gameActive) return;
+        this.gameActive = false;
         clearInterval(this.gameTimer);
 
         this.asteroids.forEach(asteroid => asteroid.remove());
