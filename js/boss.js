@@ -3,7 +3,7 @@ export class Boss {
         this.app = app;
         this.hp = 4;
         this.maxHp = 4;
-        this.sprite = new PIXI.Sprite(PIXI.Texture.from('/image/boss.png'));
+        this.sprite = new PIXI.Sprite(PIXI.Texture.from('./image/boss.png'));
         this.sprite.anchor.set(0.5);
         this.sprite.x = app.screen.width / 2;
         this.sprite.y = 150;
