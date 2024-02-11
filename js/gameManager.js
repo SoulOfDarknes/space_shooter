@@ -26,7 +26,7 @@ export class GameManager {
         this.shotsFired = 0;
         this.timeLeft = 60;
         this.initializeUI();
-        this.populateAsteroids(1);
+        this.populateAsteroids(5);
         this.setupGameTimer();
     }
 
@@ -53,6 +53,24 @@ export class GameManager {
         this.app.stage.addChild(textElement);
         return textElement;
     }
+
+    showVictoryMessage() {
+        const message = new PIXI.Text("BOSS", {
+            fontFamily: 'Arial',
+            fontSize: 36,
+            fill: 'white',
+            stroke: '#ff3300',
+            strokeThickness: 4
+        });
+        message.x = this.app.screen.width / 2 - message.width / 2;
+        message.y = this.app.screen.height / 2 - message.height / 2;
+        this.app.stage.addChild(message);
+
+        setTimeout(() => {
+            this.app.stage.removeChild(message);
+        }, 2000);
+    }
+
 
     populateAsteroids(count) {
         for (let i = 0; i < count; i++) {
@@ -217,6 +235,16 @@ export class GameManager {
     }
 
     nextLevel() {
+        if (this.currentLevel === 1) {
+            this.showVictoryMessage();
+            setTimeout(() => {
+                this.currentLevel++;
+                this.prepareForBossLevel();
+            }, 2000);
+        } else if (this.currentLevel === 2) {
+            this.boss = new Boss(this.app);
+            this.boss.activate();
+        }
 
         if (!this.gameActive) return;
         this.shotsFired = 0;
