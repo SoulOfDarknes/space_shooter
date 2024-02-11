@@ -29,7 +29,7 @@ export class GameManager {
     initializeUI() {
         this.timerText = this.createTextElement(`${this.timeLeft}`, 1240, 20);
         this.shotsText = this.createTextElement(`Bullets: ${this.maxShots} / ${this.maxShots}`, 100, 20);
-        this.startNewGameText = this.createTextElement('START NEW GAME', this.app.screen.width / 2, this.app.screen.height - 30, true);
+        this.startNewGameText = this.createButton('START NEW GAME', this.app.screen.width / 2, this.app.screen.height - 30);
     }
 
     createTextElement(text, x, y, interactive = false) {
@@ -189,5 +189,38 @@ export class GameManager {
         this.app.stage.addChild(this.background);
         this.app.stage.setChildIndex(this.background, 0);
     }
+
+    createButton(text, x, y) {
+        const buttonWidth = 300;
+        const buttonHeight = 50;
+        const borderRadius = 40;
+        const button = new PIXI.Graphics();
+
+        button.lineStyle(2, 0x1640D6, 1);
+        button.beginFill(0x000000, 0);
+        button.drawRoundedRect(-buttonWidth / 2, -buttonHeight / 2, buttonWidth, buttonHeight, borderRadius);
+        button.endFill();
+
+        const textStyle = new PIXI.TextStyle({
+            fontFamily: 'Arial',
+            fontSize: 24,
+            fill: '#1640D6',
+        });
+        const textElement = new PIXI.Text(text, textStyle);
+        textElement.anchor.set(0.5, 0.5);
+
+        const buttonContainer = new PIXI.Container();
+        buttonContainer.x = x;
+        buttonContainer.y = y;
+        buttonContainer.interactive = true;
+        buttonContainer.buttonMode = true;
+        buttonContainer.on('pointerdown', this.startNewGame.bind(this));
+
+        buttonContainer.addChild(button);
+        buttonContainer.addChild(textElement);
+
+        this.app.stage.addChild(buttonContainer);
+    }
+
 
 }

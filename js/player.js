@@ -28,7 +28,7 @@ export class Player {
 
     resetPosition() {
         this.sprite.x = this.app.screen.width / 2 - this.sprite.width / 2;
-        this.sprite.y = this.app.screen.height - this.sprite.height - 50;
+        this.sprite.y = this.app.screen.height - this.sprite.height - 60;
     }
 
     move(direction) {
