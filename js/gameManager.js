@@ -81,9 +81,8 @@ export class GameManager {
 
     shoot() {
 
-        if (this.active) { // Переконайтеся, що бос активний перед стрільбою
+        if (this.active) {
             const bullet = new BossBullet(this.app, this.sprite.x, this.sprite.y + this.sprite.height / 2, 0, 1);
-            // Тут слід додати логіку для додавання кулі на сцену або у список об'єктів для обробки
         }
         if (!this.gameActive || this.shotsFired >= this.maxShots || this.isShooting) {
             return;
@@ -124,6 +123,28 @@ export class GameManager {
         }
         if (this.boss) {
             this.boss.update();
+            this.boss.updateBullets();
+            this.boss.bullets.forEach((bossBullet, index) => {
+                if (this.hitTestRectangle(bossBullet.sprite, this.player.sprite)) {
+                    this.endGame("YOU LOSE");
+                    this.app.stage.removeChild(this.boss.sprite);
+                    this.app.stage.removeChild(this.boss.hpBar);
+                    this.boss.deactivate();
+                    bossBullet.remove();
+                }
+
+                this.bullets.forEach((playerBullet, bulletIndex) => {
+                    if (this.hitTestRectangle(playerBullet.bullet, bossBullet.sprite)) {
+                        playerBullet.remove();
+                        bossBullet.remove();
+                        this.bullets.splice(bulletIndex, 1);
+                        this.boss.bullets.splice(index, 1);
+                    }
+                });
+            });
+
+            this.boss.bullets = this.boss.bullets.filter(bullet => !bullet.removed);
+
             if (this.boss.defeated) {
                 this.app.stage.removeChild(this.boss.sprite);
                 this.app.stage.removeChild(this.boss.hpBar);

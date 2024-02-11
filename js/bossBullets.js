@@ -1,5 +1,5 @@
 export class BossBullet {
-    constructor(app, startX, startY, directionX, directionY, speed = 5) {
+    constructor(app, startX, startY, directionX, directionY, speed = 1) {
         this.app = app;
         this.sprite = new PIXI.Sprite(PIXI.Texture.from('../image/fireball.png'));
         this.sprite.anchor.set(0.5);
