@@ -225,7 +225,7 @@ export class GameManager {
     }
 
     initializeBackground() {
-        const backgroundTexture = PIXI.Texture.from('../image/background.png');
+        const backgroundTexture = PIXI.Texture.from('./image/background.png');
         this.background = new PIXI.Sprite(backgroundTexture);
         this.background.width = this.app.view.width;
         this.background.height = this.app.view.height;

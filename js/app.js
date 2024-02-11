@@ -3,7 +3,7 @@ import { GameManager } from './gameManager.js';
 const app = new PIXI.Application({ width: 1280, height: 720 });
 document.body.appendChild(app.view);
 
-const backgroundTexture = PIXI.Texture.from('../image/background.png');
+const backgroundTexture = PIXI.Texture.from('./image/background.png');
 const background = new PIXI.Sprite(backgroundTexture);
 background.width = app.view.width;
 background.height = app.view.height;
