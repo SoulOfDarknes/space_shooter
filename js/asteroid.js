@@ -2,7 +2,7 @@ export class Asteroid {
     constructor(app) {
         const asteroidTextures = [];
         for (let i = 1; i <= 16; i++) {
-            const texture = PIXI.Texture.from(`../image/asteroids/${i}.png`);
+            const texture = PIXI.Texture.from(`./image/asteroids/${i}.png`);
             asteroidTextures.push(texture);
         }
         this.app = app;
