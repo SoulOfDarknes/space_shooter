@@ -239,7 +239,6 @@ export class GameManager {
             this.showVictoryMessage();
             setTimeout(() => {
                 this.currentLevel++;
-                this.prepareForBossLevel();
             }, 2000);
         } else if (this.currentLevel === 2) {
             this.boss = new Boss(this.app);
