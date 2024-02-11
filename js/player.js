@@ -2,7 +2,7 @@ export class Player {
     constructor(app) {
         this.app = app;
         this.sprite = null;
-        this.texturePath = '../image/fighter.png';
+        this.texturePath = 'image/fighter.png';
     }
 
     load() {
