@@ -80,6 +80,11 @@ export class GameManager {
     }
 
     shoot() {
+
+        if (this.active) { // Переконайтеся, що бос активний перед стрільбою
+            const bullet = new BossBullet(this.app, this.sprite.x, this.sprite.y + this.sprite.height / 2, 0, 1);
+            // Тут слід додати логіку для додавання кулі на сцену або у список об'єктів для обробки
+        }
         if (!this.gameActive || this.shotsFired >= this.maxShots || this.isShooting) {
             return;
         }
@@ -112,10 +117,6 @@ export class GameManager {
             this.nextLevel();
         }
 
-        else if (this.currentLevel > 1 && !this.boss) {
-            this.boss = new Boss(this.app);
-        }
-
         else if (this.shotsFired === this.maxShots && this.bullets.length === 0) {
             this.endGame("YOU LOSE");
         } else if (this.timeLeft <= 0) {
@@ -126,6 +127,7 @@ export class GameManager {
             if (this.boss.defeated) {
                 this.app.stage.removeChild(this.boss.sprite);
                 this.app.stage.removeChild(this.boss.hpBar);
+                this.boss.deactivate();
                 this.endGame("YOU WIN!");
             }
         }
@@ -172,13 +174,18 @@ export class GameManager {
     }
 
     startNewGame() {
+        if (this.boss) {
+            this.boss.deactivate();
+            this.boss.removeAllBullets();
+            this.app.stage.removeChild(this.boss.sprite);
+            this.app.stage.removeChild(this.boss.hpBar);
+            this.boss = null;
+        }
+        console.log('this.boss', this.boss);
         this.currentLevel = 1;
         this.gameActive = true;
         this.shotsFired = 0;
         this.timeLeft = 60;
-        if (this.boss) {
-            this.boss = null;
-        }
         this.asteroids.forEach(asteroid => asteroid.remove());
         this.asteroids = [];
         this.bullets.forEach(bullet => bullet.remove());
@@ -199,6 +206,7 @@ export class GameManager {
         console.log(`Next lvl ${this.currentLevel}!`);
         if (this.currentLevel === 2) {
             this.boss = new Boss(this.app);
+            this.boss.activate();
         }
         this.transitionToNextLevel();
     }
@@ -289,25 +297,9 @@ export class GameManager {
                 ticker.stop();
                 ticker.remove();
                 this.app.stage.removeChild(fadeOut);
-                this.startNewLevel();
             }
         });
         ticker.start();
-    }
-
-    startNewLevel() {
-        this.resetGame();
-        this.gameActive = true;
-
-        if (!this.player) {
-            this.player = new Player(this.app);
-        }
-        this.player.load().then(() => {
-            this.player.resetPosition();
-        });
-
-        this.boss = new Boss(this.app);
-        this.timeLeft = 60;
     }
 
 }

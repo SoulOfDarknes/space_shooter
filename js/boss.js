@@ -1,3 +1,4 @@
+import { BossBullet } from './bossBullets.js';
 export class Boss {
     constructor(app) {
         this.app = app;
@@ -11,6 +12,8 @@ export class Boss {
         this.moveDirection = 1;
         this.moveSpeed = 2;
         this.defeated = false;
+        this.active = false;
+        this.bullets = [];
 
         this.hpBar = new PIXI.Graphics();
         this.updateHpBar();
@@ -20,6 +23,26 @@ export class Boss {
         this.moveInterval = setInterval(() => {
             this.randomizeMovement();
         }, 2000);
+    }
+
+    activate() {
+        this.active = true;
+        if (this.shootInterval) {
+            clearInterval(this.shootInterval);
+        }
+        this.shootInterval = setInterval(() => {
+            if (this.active) {
+                this.shoot();
+            }
+        }, 2000);
+    }
+
+    deactivate() {
+        if (this.shootInterval) {
+            clearInterval(this.shootInterval);
+        }
+        this.removeAllBullets();
+        this.active = false;
     }
 
     updateHpBar() {
@@ -34,8 +57,25 @@ export class Boss {
         this.hpBar.endFill();
     }
 
-    stop() {
-        clearInterval(this.moveInterval);
+    shoot() {
+        if (this.active) {
+            const bullet = new BossBullet(this.app, this.sprite.x, this.sprite.y + this.sprite.height / 2, 0, 1);
+            this.bullets.push(bullet);
+        }
+    }
+
+    updateBullets() {
+        this.bullets.forEach((bullet, index) => {
+            bullet.move();
+            if (bullet.removed) {
+                this.bullets.splice(index, 1);
+            }
+        });
+    }
+
+    removeAllBullets() {
+        this.bullets.forEach(bullet => bullet.remove());
+        this.bullets = [];
     }
 
     randomizeMovement() {
@@ -52,6 +92,7 @@ export class Boss {
             this.moveDirection *= -1;
         }
         this.updateHpBar();
+        this.updateBullets();
     }
 
     takeDamage() {
