@@ -1,17 +1,22 @@
 import { Asteroid } from './asteroid.js';
 import { Bullet } from './bullet.js';
 import { Player } from './player.js';
+import { Boss } from './boss.js';
 
 export class GameManager {
     constructor(app) {
         this.app = app;
         this.gameActive = true;
+        this.currentLevel = 1;
+        this.isShooting = false;
         this.initializeBackground();
         this.initializeGame();
     }
 
     initializeGame() {
-        this.player = new Player(this.app);
+        if (!this.player) {
+            this.player = new Player(this.app);
+        }
         this.player.load().then(() => {
             this.player.resetPosition();
         });
@@ -21,8 +26,7 @@ export class GameManager {
         this.shotsFired = 0;
         this.timeLeft = 60;
         this.initializeUI();
-        this.populateAsteroids(5);
-        this.setupEventListeners();
+        this.populateAsteroids(1);
         this.setupGameTimer();
     }
 
@@ -50,14 +54,6 @@ export class GameManager {
         return textElement;
     }
 
-    setupEventListeners() {
-        document.addEventListener('keydown', (e) => {
-            if (e.key === ' ') {
-                this.shoot();
-            }
-        });
-    }
-
     populateAsteroids(count) {
         for (let i = 0; i < count; i++) {
             this.asteroids.push(new Asteroid(this.app));
@@ -65,6 +61,11 @@ export class GameManager {
     }
 
     setupGameTimer() {
+
+        if (this.gameTimer) {
+            clearInterval(this.gameTimer);
+        }
+
         clearInterval(this.gameTimer);
         this.gameTimer = setInterval(() => {
             this.timeLeft -= 1;
@@ -78,30 +79,28 @@ export class GameManager {
         }, 1000);
     }
 
-
-
     shoot() {
-        if (this.shotsFired < this.maxShots && this.canShoot()) {
+        if (!this.gameActive || this.shotsFired >= this.maxShots || this.isShooting) {
+            return;
+        }
+
+        if (this.shotsFired < this.maxShots && !this.isShooting) {
+            this.isShooting = true;
             const bullet = new Bullet(this.app, this.player.sprite.x + this.player.sprite.width / 2 - 5, this.player.sprite.y);
             this.bullets.push(bullet);
             this.shotsFired++;
-            this.lastShootTime = Date.now();
             this.updateShotsText();
+
+            setTimeout(() => {
+                this.isShooting = false;
+            }, 100);
         }
     }
-
-    canShoot() {
-        const shootDelay = 200;
-        return !this.lastShootTime || Date.now() - this.lastShootTime >= shootDelay;
-    }
-
 
     updateShotsText() {
         const shotsRemaining = this.maxShots - this.shotsFired;
         this.shotsText.text = `Bullets: ${shotsRemaining} / ${this.maxShots}`;
     }
-
-
 
     update() {
         this.bullets.forEach(bullet => bullet.move());
@@ -109,13 +108,29 @@ export class GameManager {
         this.asteroids.forEach(asteroid => asteroid.move());
         this.checkCollisions();
 
-        if (this.asteroids.length === 0) {
-            this.endGame("YOU WIN");
-        } else if (this.shotsFired === this.maxShots && this.bullets.length === 0) {
+        if (this.currentLevel === 1 && this.asteroids.length === 0 && this.gameActive && !this.boss) {
+            this.nextLevel();
+        }
+
+        else if (this.currentLevel > 1 && !this.boss) {
+            this.boss = new Boss(this.app);
+        }
+
+        else if (this.shotsFired === this.maxShots && this.bullets.length === 0) {
+            this.endGame("YOU LOSE");
+        } else if (this.timeLeft <= 0) {
             this.endGame("YOU LOSE");
         }
-    }
+        if (this.boss) {
+            this.boss.update();
+            if (this.boss.defeated) {
+                this.app.stage.removeChild(this.boss.sprite);
+                this.app.stage.removeChild(this.boss.hpBar);
+                this.endGame("YOU WIN!");
+            }
+        }
 
+    }
 
     checkCollisions() {
         this.bullets.forEach((bullet) => {
@@ -125,6 +140,10 @@ export class GameManager {
                     asteroid.remove();
                 }
             });
+            if (this.boss && this.hitTestRectangle(bullet.bullet, this.boss.sprite)) {
+                bullet.remove();
+                this.boss.takeDamage();
+            }
         });
 
         this.bullets = this.bullets.filter(bullet => bullet.alive);
@@ -147,19 +166,43 @@ export class GameManager {
 
         this.asteroids.forEach(asteroid => asteroid.remove());
         this.asteroids = [];
-        this.bullets.forEach(bullet => bullet.stop());
-
-        document.removeEventListener('keydown', this.handleKeyDown);
+        this.bullets.forEach(bullet => bullet.remove());
 
         this.showEndGameMessage(message);
     }
 
     startNewGame() {
+        this.currentLevel = 1;
         this.gameActive = true;
+        this.shotsFired = 0;
+        this.timeLeft = 60;
+        if (this.boss) {
+            this.boss = null;
+        }
+        this.asteroids.forEach(asteroid => asteroid.remove());
+        this.asteroids = [];
+        this.bullets.forEach(bullet => bullet.remove());
+        this.bullets = [];
         this.app.stage.removeChildren();
         this.initializeGame();
         this.initializeBackground();
     }
+
+    nextLevel() {
+
+        if (!this.gameActive) return;
+        this.shotsFired = 0;
+        this.maxShots = 10;
+
+        this.updateShotsText();
+        this.currentLevel += 1;
+        console.log(`Next lvl ${this.currentLevel}!`);
+        if (this.currentLevel === 2) {
+            this.boss = new Boss(this.app);
+        }
+        this.transitionToNextLevel();
+    }
+
 
     showEndGameMessage(message) {
         const style = new PIXI.TextStyle({
@@ -222,5 +265,49 @@ export class GameManager {
         this.app.stage.addChild(buttonContainer);
     }
 
+    resetGame() {
+        this.app.stage.removeChildren();
+        this.asteroids = [];
+        this.bullets = [];
+        this.initializeBackground();
+        this.initializeUI();
+        this.gameActive = true;
+    }
+
+    transitionToNextLevel() {
+        const fadeOut = new PIXI.Graphics()
+            .beginFill(0x000000, 1)
+            .drawRect(0, 0, this.app.screen.width, this.app.screen.height)
+            .endFill();
+        fadeOut.alpha = 0;
+        this.app.stage.addChild(fadeOut);
+
+        let ticker = new PIXI.Ticker();
+        ticker.add((delta) => {
+            fadeOut.alpha += 0.05 * delta;
+            if (fadeOut.alpha >= 1) {
+                ticker.stop();
+                ticker.remove();
+                this.app.stage.removeChild(fadeOut);
+                this.startNewLevel();
+            }
+        });
+        ticker.start();
+    }
+
+    startNewLevel() {
+        this.resetGame();
+        this.gameActive = true;
+
+        if (!this.player) {
+            this.player = new Player(this.app);
+        }
+        this.player.load().then(() => {
+            this.player.resetPosition();
+        });
+
+        this.boss = new Boss(this.app);
+        this.timeLeft = 60;
+    }
 
 }

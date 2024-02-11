@@ -21,11 +21,19 @@ document.addEventListener("keydown", (e) => {
     if (keys.hasOwnProperty(e.code)) {
         keys[e.code] = true;
     }
+
+    if (e.code === "Space" && !gameManager.isShooting) {
+        gameManager.shoot();
+        gameManager.isShooting = true;
+    }
 });
 
 document.addEventListener("keyup", (e) => {
     if (keys.hasOwnProperty(e.code)) {
         keys[e.code] = false;
+    }
+    if (e.code === "Space") {
+        gameManager.isShooting = false;
     }
 });
 
@@ -36,14 +44,6 @@ app.ticker.add(() => {
     if (keys.ArrowRight) {
         gameManager.player.move("right");
     }
-    if (keys.Space) {
-        gameManager.shoot();
-        keys.Space = false;
-    }
 
-    gameManager.update();
-});
-
-app.ticker.add(() => {
     gameManager.update();
 });
