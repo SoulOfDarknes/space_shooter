@@ -248,6 +248,7 @@ export class GameManager {
         if (!this.gameActive) return;
         this.shotsFired = 0;
         this.maxShots = 10;
+        this.timeLeft = 60;
 
         this.updateShotsText();
         this.currentLevel += 1;
