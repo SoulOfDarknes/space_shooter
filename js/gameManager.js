@@ -220,7 +220,6 @@ export class GameManager {
             this.app.stage.removeChild(this.boss.hpBar);
             this.boss = null;
         }
-        console.log('this.boss', this.boss);
         this.currentLevel = 1;
         this.gameActive = true;
         this.shotsFired = 0;
@@ -252,7 +251,6 @@ export class GameManager {
 
         this.updateShotsText();
         this.currentLevel += 1;
-        console.log(`Next lvl ${this.currentLevel}!`);
         if (this.currentLevel === 2) {
             this.boss = new Boss(this.app);
             this.boss.activate();
